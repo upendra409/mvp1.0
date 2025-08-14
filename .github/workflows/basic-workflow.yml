@@ -28,3 +28,9 @@ jobs:
         echo ${{ secrets.PAT_TOKEN }} | docker login ghcr.io -u upendra409 --password-stdin
 
         # docker build --progress=plain -t llama3.2_1b .
+        # Build the image locally first
+        docker build -t vllm-llama32-cpu .
+
+        # Tag for GHCR (replace with your username/repo)
+        docker tag vllm-llama32-cpu ghcr.io/upendra409/vllm-llama32-cpu:v1.0
+        docker push ghcr.io/upendra409/vllm-llama32-cpu:v1.0
