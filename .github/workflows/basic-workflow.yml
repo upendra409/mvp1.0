@@ -1,0 +1,27 @@
+name: Basic CI/CD Pipeline
+
+# Trigger the workflow on push and pull requests to main branch
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+# Define environment variables
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.9'
+
+jobs:
+  # Job 1: Basic linting and testing
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Checkout the repository code
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    # Setup Node.js environment
+    - run: |
+        echo "testing Github"
