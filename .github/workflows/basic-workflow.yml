@@ -25,4 +25,6 @@ jobs:
     # Setup Node.js environment
     - run: |
         echo "testing Github"
-        docker build --progress=plain -t llama3.2_1b .
+        echo ${{ secrets.PAT_TOKEN }} | docker login ghcr.io -u upendra409 --password-stdin
+
+        # docker build --progress=plain -t llama3.2_1b .
