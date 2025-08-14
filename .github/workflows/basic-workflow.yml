@@ -25,3 +25,4 @@ jobs:
     # Setup Node.js environment
     - run: |
         echo "testing Github"
+        docker build --progress=plain -t llama3.2_1b .
