@@ -23,8 +23,8 @@ name: Basic CI/CD Pipeline
 #     "temperature": 0.7
 #   }'
 on:
-  push:
-    branches: [ main, develop ]
+  # push:
+  #   branches: [ main, develop ]
   pull_request:
     branches: [ main ]
 
