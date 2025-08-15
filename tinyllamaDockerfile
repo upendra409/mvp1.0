@@ -8,8 +8,7 @@ RUN apk add --no-cache \
     git \
     cmake \
     g++ \
-    libcurl \
-    libcurl-dev
+    libcurl
 
 # Set a working directory inside the container
 WORKDIR /app
