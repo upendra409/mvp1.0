@@ -1,6 +1,27 @@
 name: Basic CI/CD Pipeline
 
 # Trigger the workflow on push and pull requests to main branch
+# Or build directly
+# docker build -t qwen25-vllm .
+# docker run -d -p 8000:8000 --name qwen25 qwen25-vllm
+# Wait for model download (5-10 minutes first time)
+# curl http://localhost:8000/health
+
+# # Try a completion
+# curl http://localhost:8000/v1/completions \
+#   -H "Content-Type: application/json" \
+#   -d '{"model": "qwen2.5-3b", "prompt": "Hello, world!", "max_tokens": 50}'
+
+# curl http://localhost:8000/v1/chat/completions \
+#   -H "Content-Type: application/json" \
+#   -d '{
+#     "model": "qwen2.5-3b",
+#     "messages": [
+#       {"role": "user", "content": "Explain quantum computing in simple terms"}
+#     ],
+#     "max_tokens": 150,
+#     "temperature": 0.7
+#   }'
 on:
   push:
     branches: [ main, develop ]
@@ -15,7 +36,7 @@ env:
 jobs:
   # Job 1: Basic linting and testing
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     
     steps:
     # Checkout the repository code
