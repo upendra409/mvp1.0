@@ -1,0 +1,16 @@
+name: Free Disk Space (Ubuntu)
+on: push
+jobs:
+  free-disk-space:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false # Set to true to remove tool cache
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
