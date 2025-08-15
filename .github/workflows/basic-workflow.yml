@@ -51,8 +51,8 @@ jobs:
 
         # docker build --progress=plain -t llama3.2_1b .
         # Build the image locally first
-        docker build -t tinyllama-cpu -f ./tinyllamaDockerfile .
+        docker build -t tinyllama-cpu1 -f ./tinyllamaDockerfile .
 
         # Tag for GHCR (replace with your username/repo)
-        docker tag tinyllama-cpu ghcr.io/upendra409/tinyllama-cpu:v1.0
-        docker push ghcr.io/upendra409/tinyllama-cpu:v1.0
+        docker tag tinyllama-cpu1 ghcr.io/upendra409/tinyllama-cpu:v1.1
+        docker push ghcr.io/upendra409/tinyllama-cpu:v1.1
