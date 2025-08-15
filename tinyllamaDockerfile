@@ -2,12 +2,14 @@
 FROM alpine:latest
 
 # Install necessary packages for building and running llama.cpp
-# Note: cmake is already included in the previous step, but we list it explicitly here
+# We're adding libcurl-dev to fix the CURL error
 RUN apk add --no-cache \
     build-base \
     git \
     cmake \
-    g++
+    g++ \
+    libcurl \
+    libcurl-dev
 
 # Set a working directory inside the container
 WORKDIR /app
@@ -22,7 +24,6 @@ WORKDIR /app/llama.cpp
 # We are using a 1.1B version, quantized to Q4_0
 RUN wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_0.gguf
 
-# --- FIX: Use CMake for the build process ---
 # Create a build directory
 RUN mkdir build
 WORKDIR /app/llama.cpp/build
@@ -33,11 +34,8 @@ RUN cmake ..
 # Build the project
 RUN cmake --build .
 
-# --- End of FIX ---
-
 # Expose a port if you plan to run a server
 EXPOSE 8080
 
 # Command to run when the container starts
-# Note: The server executable is now in the 'build' directory
 CMD ["./bin/server", "-m", "/app/llama.cpp/tinyllama-1.1b-chat-v1.0.Q4_0.gguf", "-c", "2048", "--host", "0.0.0.0"]
