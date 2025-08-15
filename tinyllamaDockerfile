@@ -7,7 +7,8 @@ RUN apk add --no-cache \
     build-base \
     git \
     cmake \
-    g++
+    g++ \
+    wget
 
 # Set a working directory inside the container
 WORKDIR /app
@@ -30,12 +31,13 @@ WORKDIR /app/llama.cpp/build
 RUN cmake .. -DLLAMA_CURL=OFF
 
 # Build the project
-RUN cmake --build .
+RUN cmake --build . -j4
 
-# --- End of fix ---
+# --- Check and verify server location ---
+RUN find . -name "server" -type f -executable
 
 # Expose a port if you plan to run a server
 EXPOSE 8080
 
-# Command to run when the container starts
-CMD ["./bin/server", "-m", "/app/llama.cpp/tinyllama-1.1b-chat-v1.0.Q4_0.gguf", "-c", "2048", "--host", "0.0.0.0"]
+# Use the correct path to the server executable
+CMD ["./server", "-m", "/app/llama.cpp/tinyllama-1.1b-chat-v1.0.Q4_0.gguf", "-c", "2048", "--host", "0.0.0.0"]
