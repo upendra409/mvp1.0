@@ -17,15 +17,16 @@ WORKDIR /app/llama.cpp
 RUN mkdir build && cd build && cmake -DLLAMA_CURL=OFF .. && cmake --build . --config Release
 
 # Install Python requirements
-RUN pip3 install torch numpy sentencepiece
+RUN pip3 install torch numpy sentencepiece huggingface_hub transformers
 
-# Download and convert TinyLlama model
+# Download the TinyLlama model from Hugging Face
 RUN mkdir -p models
 WORKDIR /app/llama.cpp
 RUN python3 -m pip install -r requirements.txt
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='TinyLlama/TinyLlama-1.1B-Chat-v1.0', local_dir='./TinyLlama-1.1B-Chat-v1.0')"
 
-# Use the correct conversion script (which is in the root directory, not in scripts/)
-RUN python3 ./convert_hf_to_gguf.py TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+# Now convert the downloaded model
+RUN python3 ./convert_hf_to_gguf.py ./TinyLlama-1.1B-Chat-v1.0 \
     --outfile models/tinyllama-1.1b-chat.gguf
 
 # Create simple server script
