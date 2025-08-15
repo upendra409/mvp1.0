@@ -1,43 +1,36 @@
-# Use a lightweight base image like Alpine for a small footprint
-FROM alpine:latest
+FROM ubuntu:22.04
 
-# Install necessary packages for building and running llama.cpp
-# We only need the base build tools and git
-RUN apk add --no-cache \
-    build-base \
+# Install dependencies
+RUN apt-get update && apt-get install -y \
     git \
+    build-essential \
     cmake \
-    g++ \
-    wget
+    python3 \
+    python3-pip \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set a working directory inside the container
+# Clone and build llama.cpp
 WORKDIR /app
-
-# Clone the llama.cpp repository
 RUN git clone https://github.com/ggerganov/llama.cpp.git
-
-# Change to the llama.cpp directory
 WORKDIR /app/llama.cpp
+RUN make
 
-# Download a TinyLlama GGUF model file
-RUN wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_0.gguf
+# Install Python requirements
+RUN pip3 install torch numpy sentencepiece
 
-# --- Use CMake for the build process with the flag to disable CURL ---
-# Create a build directory
-RUN mkdir build
-WORKDIR /app/llama.cpp/build
+# Download and convert TinyLlama model
+RUN mkdir -p models
+WORKDIR /app/llama.cpp
+RUN python3 -m pip install -r requirements.txt
+RUN python3 scripts/convert_hf_to_gguf.py TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+    --outfile models/tinyllama-1.1b-chat.gguf
 
-# Configure the build with CMake, turning off the CURL feature
-RUN cmake .. -DLLAMA_CURL=OFF
+# Create simple server script
+RUN echo '#!/bin/bash\n\
+./server -m models/tinyllama-1.1b-chat.gguf --host 0.0.0.0 --port 8080 -c 2048 -ngl 0\n\
+' > start-server.sh && chmod +x start-server.sh
 
-# Build the project
-RUN cmake --build . -j4
-
-# --- Check and verify server location ---
-RUN find . -name "server" -type f -executable
-
-# Expose a port if you plan to run a server
 EXPOSE 8080
 
-# Use the correct path to the server executable
-CMD ["./server", "-m", "/app/llama.cpp/tinyllama-1.1b-chat-v1.0.Q4_0.gguf", "-c", "2048", "--host", "0.0.0.0"]
+CMD ["./start-server.sh"]
