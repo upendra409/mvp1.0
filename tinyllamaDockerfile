@@ -2,6 +2,7 @@
 FROM alpine:latest
 
 # Install necessary packages for building and running llama.cpp
+# Note: cmake is already included in the previous step, but we list it explicitly here
 RUN apk add --no-cache \
     build-base \
     git \
@@ -21,14 +22,22 @@ WORKDIR /app/llama.cpp
 # We are using a 1.1B version, quantized to Q4_0
 RUN wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_0.gguf
 
-# Build the llama.cpp main executable
-# The make command builds the core binaries
-RUN make
+# --- FIX: Use CMake for the build process ---
+# Create a build directory
+RUN mkdir build
+WORKDIR /app/llama.cpp/build
+
+# Configure the build with CMake
+RUN cmake ..
+
+# Build the project
+RUN cmake --build .
+
+# --- End of FIX ---
 
 # Expose a port if you plan to run a server
-# For simple CLI usage, this isn't strictly necessary but is good practice
 EXPOSE 8080
 
 # Command to run when the container starts
-# This starts the llama.cpp server and loads the downloaded model
-CMD ["./server", "-m", "tinyllama-1.1b-chat-v1.0.Q4_0.gguf", "-c", "2048", "--host", "0.0.0.0"]
+# Note: The server executable is now in the 'build' directory
+CMD ["./bin/server", "-m", "/app/llama.cpp/tinyllama-1.1b-chat-v1.0.Q4_0.gguf", "-c", "2048", "--host", "0.0.0.0"]
