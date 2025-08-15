@@ -29,8 +29,8 @@ jobs:
 
         # docker build --progress=plain -t llama3.2_1b .
         # Build the image locally first
-        docker build -t vllm-qwen25B-cpu -f ./qwen2.5BDockerfile .
+        docker build -t vllm-qwen25b-cpu -f ./qwen2.5BDockerfile .
 
         # Tag for GHCR (replace with your username/repo)
-        docker tag vllm-qwen25B-cpu ghcr.io/upendra409/vllm-qwen25B-cpu:v1.0
-        docker push ghcr.io/upendra409/vllm-qwen25B-cpu:v1.0
+        docker tag vllm-qwen25b-cpu ghcr.io/upendra409/vllm-qwen25b-cpu:v1.0
+        docker push ghcr.io/upendra409/vllm-qwen25b-cpu:v1.0
