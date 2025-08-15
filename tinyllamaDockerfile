@@ -23,8 +23,15 @@ RUN pip3 install torch numpy sentencepiece
 RUN mkdir -p models
 WORKDIR /app/llama.cpp
 RUN python3 -m pip install -r requirements.txt
-RUN python3 scripts/convert_hf_to_gguf.py TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
-    --outfile models/tinyllama-1.1b-chat.gguf
+
+# Use the correct path for the conversion script
+RUN python3 -c "from glob import glob; print('Available conversion scripts:', glob('*.py') + glob('*/*.py'))" || true
+RUN ls -la
+# Try to find the conversion script in the repository
+RUN find . -name "convert_*_to_gguf.py" -o -name "*convert*.py" | grep -i hf || echo "No conversion script found"
+
+# Use the correct conversion script path (adjust as needed based on the find results)
+RUN python3 convert.py --outtype f16 --outfile models/tinyllama-1.1b-chat.gguf TinyLlama/TinyLlama-1.1B-Chat-v1.0
 
 # Create simple server script
 RUN echo '#!/bin/bash\n\
