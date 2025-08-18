@@ -1,0 +1,41 @@
+FROM ubuntu:22.04
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    build-essential \
+    cmake \
+    python3 \
+    python3-pip \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone and build llama.cpp with CMake
+WORKDIR /app
+RUN git clone https://github.com/ggerganov/llama.cpp.git
+WORKDIR /app/llama.cpp
+RUN mkdir build && cd build && cmake -DLLAMA_CURL=OFF .. && cmake --build . --config Release
+
+# Install Python requirements
+RUN pip3 install torch huggingface_hub transformers sentencepiece protobuf tqdm numpy
+
+# Download and convert Phi-3 Mini model
+WORKDIR /app/llama.cpp
+RUN mkdir -p models
+
+# Download the model from Hugging Face
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='microsoft/Phi-3-mini-128k-instruct', local_dir='./phi3-mini')"
+
+# Convert the model to GGUF format
+RUN python3 ./convert_hf_to_gguf.py ./phi3-mini --outfile models/phi3-mini.gguf
+
+# Create a server start script
+RUN echo '#!/bin/bash\n\
+./build/bin/server -m models/phi3-mini.gguf --host 0.0.0.0 --port 8080 -c 2048 -ngl 0\n\
+' > start-server.sh && chmod +x start-server.sh
+
+# Expose the server port
+EXPOSE 8080
+
+# Run the server when the container starts
+CMD ["./start-server.sh"]
